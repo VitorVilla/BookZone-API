@@ -1,0 +1,49 @@
+version: '3'
+services:
+  bookzone-api:
+    build: .
+    container_name: bookzone-api
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      - DB_URL=jdbc:postgresql://bookzone-db:5432/books
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=root
+    networks:
+      - bookzone-network
+
+  db:
+    image: postgres:16
+    container_name: bookzone-db
+    environment:
+      POSTGRES_DB: books
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - bookzone-network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    networks:
+      - bookzone-network
+
+volumes:
+  pgdata:
+    driver: local
+
+networks:
+  bookzone-network:
+    driver: bridge
